@@ -1,0 +1,44 @@
+services:
+  redis:
+    image: redis:7-alpine
+  db:
+    image: postgres:15-alpine
+    env_file: core/.env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  web:
+    build: core
+    env_file: core/.env
+    command: >
+      sh -c "python manage.py wait_for_db &&
+             python manage.py migrate &&
+             daphne -b 0.0.0.0 -p 8000 core.asgi:application"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./core:/app
+      - django_media:/app/media
+    depends_on:
+      - db
+      - redis
+
+  worker:
+    build: core
+    env_file: core/.env
+    command: celery -A core worker -l info
+    depends_on:
+      - redis
+
+  frontend:
+    build: frontend
+    ports:
+      - "80:80"
+    volumes:
+      - django_media:/app/media:ro
+    depends_on:
+      - web
+
+volumes:
+  postgres_data:
+  django_media:
