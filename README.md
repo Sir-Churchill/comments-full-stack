@@ -74,5 +74,4 @@
 * **Secure Deletion:** Видалення коментарів доступне лише авторам або адміністраторам.
 
 ---
-![Schema.png](Schema.png)# comments-py
-# comments-full-stack
+![Schema.png](Schema.png)
